@@ -6,41 +6,82 @@
   </head>
   <body>
 
-  <h1>My First Heading</h1>
-  <p>My first paragraph.</p>
+  <h1>Alphabet Frequency</h1>
 
   </body>
 </html>
 
 <script>
-  var data=[2019,2938,3452,1334,4321,1233,2175]
-  let xScale = d3.scaleLinear()
-                 .domain([0,data.length])
-                 .range([0,200])
+  var width = 960
+  var height = 500
 
-  let yScale = d3.scaleLinear()
-                 .domain([0,10000])
-                 .range([100,0])
+  var data_arr =[]
 
-  let svg = d3.select("body")
-              .append('svg')
-              .attr('width',500)
-              .attr('height',500)
+  var x = d3.scaleLinear()
+            .range([0,width])
 
-  // svg.append('rect')
-  //    .attr('x',10)
-  //    .attr('y',10)
-  //    .attr('width',100)
-  //    .attr('height',100)
-  //    .style('fill','red')
+  var y = d3.scaleLinear()
+            .range([0,height])
 
-  svg.selectAll('rect')
-     .data(data)
-     .enter()
-     .append('rect')
-     .attr('x', (d,i) => xScale(i))
-     .attr('y', d => yScale(d))
-     .attr('height', d => 100 - yScale(d))
-     .attr('width',5)
-     .style('fill','red')
+  var color_array = [`#383867`, `#584c77`, `#33431e`, `#a36629`, `#92462f`, `#b63e36`, `#b74a70`, `#946943`]
+
+
+  var color = d3.scaleOrdinal(color_array)
+
+  //appned scale
+  var svg = d3.select("body")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height)
+
+  var partition = d3.partition()
+    .size([width, height])
+    .padding(0)
+    .round(true);
+
+  //receive data
+  d3.json("data/flare-2.json", function(error, root){
+    if (error) throw error
+
+    root = d3.hirerachy(d3.entries(root)[0], function(d) {
+        return d3.entries(d.value)
+      })
+      .sum(function(d) { return d.value })
+      .sort(function(a, b) { return b.value - a.value; });
+    })
+
+    partition(root);
+
+    var rect = svg.selectAll('rect')
+                  .data(data)
+                  .enter()
+                  .append('rect')
+                  .attr('x', (d,i) => xScale(i))
+                  .attr('y', d => yScale(d))
+                  .attr('height', d => 100 - yScale(d))
+                  .attr('width',5)
+
+  //create scale
+  var scale = d3.scaleLinear()
+                .domain([d3.min(data_arr), d3.max(data_arr)])
+                .range([0, width-100])
+
+
+  function clicked(d) {
+    x.domain([d.x0, d.x1]);
+    y.domain([d.y0, height]).range([d.depth ? 20 : 0, height]);
+
+    rect.transition()
+        .duration(750)
+        .attr("x", function(d) { return x(d.x0); })
+        .attr("y", function(d) { return y(d.y0); })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0); })
+        .attr("height", function(d) { return y(d.y1) - y(d.y0); });
+  }
+
+
+
+
+
+
 </script>
