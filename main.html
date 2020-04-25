@@ -37,6 +37,8 @@
     .padding(2)
     .round(true);
 
+  var rect;
+
   //receive data
   d3.json("data/flare-2.json", function(error, root){
     if (error) throw error
@@ -45,26 +47,26 @@
               return d3.entries(d.value)
             })
              .sum(function(d) { return d.value })
-             .sort(function(a, b) { return b.value - a.value; });
+            //  .sort(function(a, b) { return b.value - a.value; });
 
     partition(root);
 
-    var rect = svg.selectAll('rect')
-                  .data(root.descendants())
-                  .enter()
-                  .append('rect')
-                  .attr("x", function(d) { return d.x0; })
-                  .attr("y", function(d) { return d.y0; })
-                  .attr("width", function(d) { return d.x1 - d.x0; })
-                  .attr("height", function(d) { return d.y1 - d.y0; })
-                  .attr("fill", function(d) { return color((d.children ? d : d.parent).data.key); })
-                  .on("click", clicked);
+    rect = svg.selectAll('rect')
+              .data(root.descendants())
+              .enter()
+              .append('rect')
+              .attr("x", function(d) { return d.x0; })
+              .attr("y", function(d) { return d.y0; })
+              .attr("width", function(d) { return d.x1 - d.x0; })
+              .attr("height", function(d) { return d.y1 - d.y0; })
+              .attr("fill", function(d) { return color((d.children ? d : d.parent).data.key); })
+              .on("click", clicked);
     })
 
   //create scale
-  var scale = d3.scaleLinear()
-                .domain([d3.min(data_arr), d3.max(data_arr)])
-                .range([0, width-100])
+  // var scale = d3.scaleLinear()
+  //               .domain([d3.min(data_arr), d3.max(data_arr)])
+  //               .range([0, width-100])
 
 
   function clicked(d) {
